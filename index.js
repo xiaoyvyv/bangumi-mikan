@@ -33,7 +33,6 @@ async function syncMikanIds(githubToken) {
             $(".m-week-square a").each((index, item) => {
                 // noinspection JSCheckFunctionSignatures
                 const url = $(item).attr("href") || "";
-                console.log(url)
                 const lastIndex = url.lastIndexOf("/");
                 const id = lastIndex === -1 ? 0 : Number.parseInt(url.substring(lastIndex + 1));
                 if (id !== 0) items.push(id);
