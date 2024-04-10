@@ -50705,6 +50705,7 @@ async function uploadJson(githubToken, string) {
     const sha = data.sha || '';
     const params = repoInfo();
 
+    const octokit = github.getOctokit(githubToken);
     octokit.rest.repos.createOrUpdateFileContents({
         owner: params.owner,
         repo: params.repo,
