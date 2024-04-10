@@ -50654,7 +50654,7 @@ async function syncMikanIds(githubToken) {
         const bgmId = oldMapIds[i.toString()] || '';
         if (bgmId.length > 0) {
             mapIds[i.toString()] = bgmId;
-            console.log(`MikanId: ${i} -> BgmId: ${id}, 来自缓存数据`);
+            console.log(`MikanId: ${i} -> BgmId: ${bgmId}, 来自缓存数据`);
         } else {
             const id = await requestBgmId(i);
             if (id.length > 0) {
