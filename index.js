@@ -41,15 +41,33 @@ async function syncMikanIds(githubToken) {
             return items;
         });
 
+    // 查询已经存在的数据
+    const data = await queryTargetContent(githubToken);
+    let oldMapIds;
+    try {
+        const buffer = Buffer.from(data.content || '', 'base64');
+        oldMapIds = JSON.parse(buffer.toString());
+    } catch (e) {
+        oldMapIds = {};
+    }
+
+    console.log("已经存在的数据: " + Object.keys(oldMapIds).length);
+
     const maxId = Math.max(...homeIds);
     const mapIds = {};
     for (let i = 1; i <= maxId; i++) {
-        const id = await requestBgmId(i);
-        if (id.length > 0) {
-            mapIds[i.toString()] = id;
-        }
+        const bgmId = oldMapIds[i.toString()] || '';
+        if (bgmId.length > 0) {
+            mapIds[i.toString()] = bgmId;
+            console.log(`MikanId: ${i} -> BgmId: ${id}, 来自缓存数据`);
+        } else {
+            const id = await requestBgmId(i);
+            if (id.length > 0) {
+                mapIds[i.toString()] = id;
+            }
 
-        console.log(`MikanId: ${i} -> BgmId: ${id}`);
+            console.log(`MikanId: ${i} -> BgmId: ${id}`);
+        }
     }
 
     console.log("映射表同步完成");
@@ -59,6 +77,7 @@ async function syncMikanIds(githubToken) {
 
     console.log("上传完成");
 }
+
 
 const requestBgmId = async (id) => {
     const url = `https://mikanani.me/Home/Bangumi/${id}`;
@@ -86,26 +105,15 @@ const requestBgmId = async (id) => {
         .catch(() => "");
 }
 
-
 async function uploadJson(githubToken, string) {
-    // const {owner, repo} = {owner: "xiaoyvyv", repo: "bangumi-data"};
-    const {owner, repo} = github.context.repo;
-    const fileName = core.getInput("mikan-json-path") || "data/data.json";
-
-    console.log(`owner:${owner}, repo: ${repo}`);
-
-    const octokit = github.getOctokit(githubToken);
-    const res = await octokit.rest.repos.getContent({
-        owner: owner,
-        repo: repo,
-        path: fileName
-    }).catch(() => ({data: {}}));
-    const sha = res.data['sha'] || '';
+    const data = await queryTargetContent(githubToken);
+    const sha = data.sha || '';
+    const params = repoInfo();
 
     octokit.rest.repos.createOrUpdateFileContents({
-        owner: owner,
-        repo: repo,
-        path: fileName,
+        owner: params.owner,
+        repo: params.repo,
+        path: params.path,
         message: '同步更新蜜柑映射表',
         content: Buffer.from(string).toString('base64'),
         committer: {
@@ -125,5 +133,26 @@ async function uploadJson(githubToken, string) {
         core.setOutput("message", `Error uploading file "${fileName}":` + error);
         core.setFailed(error.message);
     });
+}
+
+const queryTargetContent = async (githubToken) => {
+    if (githubToken.length === 0) return {};
+
+    const params = repoInfo();
+
+    console.log(`owner:${params.owner}, repo: ${params.repo}`);
+
+    const octokit = github.getOctokit(githubToken);
+    const res = await octokit.rest.repos
+        .getContent(params)
+        .catch(() => ({data: {}}));
+
+    return res.data || {};
+}
+
+const repoInfo = () => {
+    const {owner, repo} = github.context.repo;
+    const path = core.getInput("mikan-json-path") || "mikan/bangumi-mikan.json";
+    return {owner: owner, repo: repo, path: path}
 }
 

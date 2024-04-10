@@ -7,7 +7,7 @@ inputs:
   mikan-json-path:
     description: '映射文件上传保存路径'
     required: true
-    default: 'bgm/bangumi-mikan.json'
+    default: 'mikan/bangumi-mikan.json'
 outputs:
   message:
     description: '输出信息'
