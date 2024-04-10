@@ -128,7 +128,7 @@ async function uploadJson(githubToken, string) {
         sha: sha,
     }).then(() => {
         console.log(`上传成功`);
-        core.setOutput("message", `https://github.com/${owner}/${repo}/raw/main/${params.path}`);
+        core.setOutput("message", `https://github.com/${params.owner}/${params.repo}/raw/main/${params.path}`);
     }).catch(error => {
         console.error(`Error uploading file "${params.path}":`, error);
         core.setOutput("message", `Error uploading file "${params.path}":` + error);
