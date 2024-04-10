@@ -1,0 +1,16 @@
+name: 'Mikan id map syncer for Bangumi.TV'
+description: '蜜柑计划 -> 番组计划 ID 映射服务'
+inputs:
+  github-token:
+    description: "Github Token"
+    required: true
+  mikan-json-path:
+    description: '映射文件上传保存路径'
+    required: true
+    default: 'bgm/bangumi-mikan.json'
+outputs:
+  message:
+    description: '输出信息'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
